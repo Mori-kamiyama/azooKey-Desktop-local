@@ -9,18 +9,30 @@ struct ConfigWindow: View {
     @ConfigState private var zenzai = Config.ZenzaiIntegration()
     @ConfigState private var zenzaiProfile = Config.ZenzaiProfile()
     @ConfigState private var zenzaiPersonalizationLevel = Config.ZenzaiPersonalizationLevel()
-    @ConfigState private var enableOpenAiApiKey = Config.EnableOpenAiApiKey()
     @ConfigState private var openAiApiKey = Config.OpenAiApiKey()
     @ConfigState private var openAiModelName = Config.OpenAiModelName()
+    @ConfigState private var ollamaUrl = Config.OllamaUrl()
+    @ConfigState private var ollamaModelName = Config.OllamaModelName()
     @ConfigState private var learning = Config.Learning()
     @ConfigState private var inferenceLimit = Config.ZenzaiInferenceLimit()
     @ConfigState private var debugWindow = Config.DebugWindow()
     @ConfigState private var userDictionary = Config.UserDictionary()
+    
+    enum BackendOption: String, CaseIterable, Identifiable {
+        case none = "使わない"
+        case ollama = "Ollama"
+        case gpt = "ChatGPT"
+        
+        var id: Self { self }
+    }
+
+    @State private var selectedBackend: BackendOption = .none
 
     @State private var zenzaiHelpPopover = false
     @State private var zenzaiProfileHelpPopover = false
     @State private var zenzaiInferenceLimitHelpPopover = false
     @State private var openAiApiKeyPopover = false
+    @State private var ollamaUrlPopover = false
 
     @ViewBuilder
     private func helpButton(helpContent: LocalizedStringKey, isPresented: Binding<Bool>) -> some View {
@@ -105,16 +117,33 @@ struct ConfigWindow: View {
                     }
                     Divider()
                     Toggle("（開発者用）デバッグウィンドウを有効化", isOn: $debugWindow)
-                    Toggle("OpenAI APIキーの利用", isOn: $enableOpenAiApiKey)
-                    HStack {
-                        SecureField("OpenAI API", text: $openAiApiKey, prompt: Text("例:sk-xxxxxxxxxxx"))
-                        helpButton(
-                            helpContent: "OpenAI APIキーはローカルのみで管理され、外部に公開されることはありません。生成の際にAPIを利用するため、課金が発生します。",
-                            isPresented: $openAiApiKeyPopover
-                        )
+                    Divider()
+                    Section(header: Text("生成モデル")) {
+                        Picker("使用するバックエンド", selection: $selectedBackend) {
+                            ForEach(BackendOption.allCases) { option in
+                                Text(option.rawValue).tag(option)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        
+                        // Ollama
+                        if selectedBackend == .ollama {
+                            VStack(alignment: .leading) {
+                                TextField("Ollama URL", text: $ollamaUrl, prompt: Text("例: http://localhost:11434"))
+                                TextField("Ollamaモデル名", text: $ollamaModelName, prompt: Text("例: llama3.2"))
+                            }
+                        }
+                        
+                        // ChatGPT
+                        if selectedBackend == .gpt {
+                            VStack(alignment: .leading) {
+                                SecureField("OpenAI APIキー", text: $openAiApiKey, prompt: Text("例: sk-xxxxxxxxxxx"))
+                                TextField("OpenAIモデル名", text: $openAiModelName, prompt: Text("例: gpt-4o-mini"))
+                            }
+                        }
                     }
-                    TextField("OpenAI Model Name", text: $openAiModelName, prompt: Text("例: gpt-4o-mini"))
-                        .disabled(!$enableOpenAiApiKey.wrappedValue)
+
+                    Divider()
                     LabeledContent("Version") {
                         Text(PackageMetadata.gitTag ?? PackageMetadata.gitCommit ?? "Unknown Version")
                             .monospaced()

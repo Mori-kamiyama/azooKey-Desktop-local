@@ -50,6 +50,11 @@ extension Config {
         static let `default` = true
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableZenzai"
     }
+    ///  Ollama URL
+    struct EnableOllama: BoolConfigItem {
+        static let `default` = false
+        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableOllama"
+    }
     /// OpenAI APIキー
     struct EnableOpenAiApiKey: BoolConfigItem {
         static let `default` = false

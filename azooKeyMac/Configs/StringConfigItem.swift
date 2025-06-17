@@ -66,6 +66,18 @@ extension Config {
         static var `default`: String = "gpt-4o-mini"
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.OpenAiModelName"
     }
+    
+    /// Ollama URL
+    struct OllamaUrl: StringConfigItem {
+        static var `default`: String = "http://localhost:11434"
+        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.OllamaUrl"
+    }
+    
+    /// Ollamaモデル名
+    struct OllamaModelName: StringConfigItem {
+        static var `default`: String = "llama3.2"
+        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.OllamaModelName"
+    }
 
     /// プロンプト履歴（JSON形式で保存）
     struct PromptHistory: StringConfigItem {
