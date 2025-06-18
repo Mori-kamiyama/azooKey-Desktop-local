@@ -187,7 +187,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             inputLanguage: self.inputLanguage,
             liveConversionEnabled: Config.LiveConversion().value,
             enableDebugWindow: Config.DebugWindow().value,
-            enableSuggestion: Config.EnableOpenAiApiKey().value
+            enableSuggestion: Config.AIBackend().value == .openAI
         )
         return handleClientAction(clientAction, clientActionCallback: clientActionCallback, client: client)
     }
@@ -501,19 +501,40 @@ extension azooKeyMacInputController {
 
         self.segmentsManager.appendDebugMessage("プロンプト取得成功: \(prompt) << \(composingText)")
 
-        let apiKey = Config.OpenAiApiKey().value
-        let modelName = Config.OpenAiModelName().value
+        let backend = Config.AIBackend().value
+        let modelName: String
+        switch backend {
+        case .openAI:
+            modelName = Config.OpenAiModelName().value
+        case .ollama:
+            modelName = Config.OllamaModelName().value
+        case .none:
+            self.segmentsManager.appendDebugMessage("AI backend none, aborting")
+            return
+        }
         let request = OpenAIRequest(prompt: prompt, target: composingText, modelName: modelName)
         self.segmentsManager.appendDebugMessage("APIリクエスト準備完了: prompt=\(prompt), target=\(composingText), modelName=\(modelName)")
-        self.segmentsManager.appendDebugMessage("Using OpenAI Model: \(modelName)")
+        self.segmentsManager.appendDebugMessage("Using AI Model: \(modelName)")
 
         // 非同期タスクでリクエストを送信
         Task {
             do {
                 self.segmentsManager.appendDebugMessage("APIリクエスト送信中...")
-                let predictions = try await OpenAIClient.sendRequest(request, apiKey: apiKey, logger: { [weak self] message in
-                    self?.segmentsManager.appendDebugMessage(message)
-                })
+                let predictions: [String]
+                switch backend {
+                case .openAI:
+                    let apiKey = Config.OpenAiApiKey().value
+                    predictions = try await OpenAIClient.sendRequest(request, apiKey: apiKey, logger: { [weak self] message in
+                        self?.segmentsManager.appendDebugMessage(message)
+                    })
+                case .ollama:
+                    let baseURL = Config.OllamaUrl().value
+                    predictions = try await OllamaClient.sendRequest(request, baseURL: baseURL, logger: { [weak self] message in
+                        self?.segmentsManager.appendDebugMessage(message)
+                    })
+                case .none:
+                    predictions = []
+                }
                 self.segmentsManager.appendDebugMessage("APIレスポンス受信成功: \(predictions)")
 
                 // String配列からCandidate配列に変換

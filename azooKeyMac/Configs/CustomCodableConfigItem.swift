@@ -131,3 +131,30 @@ extension Config {
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.zenzai.personalization_level"
     }
 }
+
+extension Config {
+    /// AI backend selection
+    struct AIBackend: CustomCodableConfigItem {
+        enum Value: String, Codable, CaseIterable, Identifiable {
+            case none
+            case ollama
+            case openAI
+
+            var id: Self { self }
+
+            var displayName: String {
+                switch self {
+                case .none:
+                    return "使わない"
+                case .ollama:
+                    return "Ollama"
+                case .openAI:
+                    return "ChatGPT"
+                }
+            }
+        }
+
+        static var `default`: Value = .none
+        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.aiBackend"
+    }
+}
