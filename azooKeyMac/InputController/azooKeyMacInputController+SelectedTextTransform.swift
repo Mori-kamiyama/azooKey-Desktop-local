@@ -161,12 +161,13 @@ extension azooKeyMacInputController {
     func transformSelectedText(selectedText: String, prompt: String, beforeContext: String = "", afterContext: String = "") {
         self.segmentsManager.appendDebugMessage("transformSelectedText: Starting with text '\(selectedText)' and prompt '\(prompt)'")
 
-        guard Config.EnableOpenAiApiKey().value else {
-            self.segmentsManager.appendDebugMessage("transformSelectedText: OpenAI API is not enabled")
+        let backend = Config.AIBackend().value
+        guard backend != .none else {
+            self.segmentsManager.appendDebugMessage("transformSelectedText: AI backend is not configured")
             return
         }
 
-        self.segmentsManager.appendDebugMessage("transformSelectedText: OpenAI API is enabled, starting request")
+        self.segmentsManager.appendDebugMessage("transformSelectedText: AI backend is enabled, starting request")
 
         Task {
             do {
@@ -196,25 +197,31 @@ extension azooKeyMacInputController {
                     self.segmentsManager.appendDebugMessage("transformSelectedText: Created system prompt")
                 }
 
-                // Get API key from Config
-                let apiKey = Config.OpenAiApiKey().value
-                guard !apiKey.isEmpty else {
-                    await MainActor.run {
-                        self.segmentsManager.appendDebugMessage("transformSelectedText: No OpenAI API key configured")
-                    }
+                await MainActor.run {
+                    self.segmentsManager.appendDebugMessage("transformSelectedText: sending request")
+                }
+
+                let result: String
+                switch backend {
+                case .openAI:
+                    let apiKey = Config.OpenAiApiKey().value
+                    let modelName = Config.OpenAiModelName().value
+                    result = try await OpenAIClient.sendTextTransformRequest(
+                        prompt: systemPrompt,
+                        modelName: modelName,
+                        apiKey: apiKey
+                    )
+                case .ollama:
+                    let url = Config.OllamaUrl().value
+                    let modelName = Config.OllamaModelName().value
+                    result = try await OllamaClient.sendTextTransformRequest(
+                        prompt: systemPrompt,
+                        modelName: modelName,
+                        baseURL: url
+                    )
+                case .none:
                     return
                 }
-
-                await MainActor.run {
-                    self.segmentsManager.appendDebugMessage("transformSelectedText: API key found, making request")
-                }
-
-                let modelName = Config.OpenAiModelName().value
-                let result = try await OpenAIClient.sendTextTransformRequest(
-                    prompt: systemPrompt,
-                    modelName: modelName,
-                    apiKey: apiKey
-                )
 
                 await MainActor.run {
                     self.segmentsManager.appendDebugMessage("transformSelectedText: API request completed, result: \(result)")
@@ -334,11 +341,12 @@ extension azooKeyMacInputController {
             self.segmentsManager.appendDebugMessage("getTransformationPreview: Starting preview request")
         }
 
-        guard Config.EnableOpenAiApiKey().value else {
+        let backend = Config.AIBackend().value
+        guard backend != .none else {
             await MainActor.run {
-                self.segmentsManager.appendDebugMessage("getTransformationPreview: OpenAI API is not enabled")
+                self.segmentsManager.appendDebugMessage("getTransformationPreview: AI backend is not enabled")
             }
-            throw NSError(domain: "TransformationError", code: -1, userInfo: [NSLocalizedDescriptionKey: "AI transformation is not available. Please enable OpenAI API in preferences."])
+            throw NSError(domain: "TransformationError", code: -1, userInfo: [NSLocalizedDescriptionKey: "AI transformation is not available. Please configure an AI backend in preferences."])
         }
 
         // Create custom prompt for text transformation with context
@@ -363,25 +371,37 @@ extension azooKeyMacInputController {
 
         systemPrompt += "\n\nUser instructions: \(prompt)"
 
-        // Get API key from Config
-        let apiKey = Config.OpenAiApiKey().value
-        guard !apiKey.isEmpty else {
-            await MainActor.run {
-                self.segmentsManager.appendDebugMessage("getTransformationPreview: No OpenAI API key configured")
-            }
-            throw NSError(domain: "TransformationError", code: -2, userInfo: [NSLocalizedDescriptionKey: "OpenAI API key is missing. Please configure your API key in preferences."])
-        }
-
         await MainActor.run {
             self.segmentsManager.appendDebugMessage("getTransformationPreview: Sending preview request to API")
         }
 
-        let modelName = Config.OpenAiModelName().value
-        let result = try await OpenAIClient.sendTextTransformRequest(
-            prompt: systemPrompt,
-            modelName: modelName,
-            apiKey: apiKey
-        )
+        let result: String
+        switch backend {
+        case .openAI:
+            let apiKey = Config.OpenAiApiKey().value
+            guard !apiKey.isEmpty else {
+                await MainActor.run {
+                    self.segmentsManager.appendDebugMessage("getTransformationPreview: No OpenAI API key configured")
+                }
+                throw NSError(domain: "TransformationError", code: -2, userInfo: [NSLocalizedDescriptionKey: "OpenAI API key is missing. Please configure your API key in preferences."])
+            }
+            let modelName = Config.OpenAiModelName().value
+            result = try await OpenAIClient.sendTextTransformRequest(
+                prompt: systemPrompt,
+                modelName: modelName,
+                apiKey: apiKey
+            )
+        case .ollama:
+            let url = Config.OllamaUrl().value
+            let modelName = Config.OllamaModelName().value
+            result = try await OllamaClient.sendTextTransformRequest(
+                prompt: systemPrompt,
+                modelName: modelName,
+                baseURL: url
+            )
+        case .none:
+            throw NSError(domain: "TransformationError", code: -3, userInfo: [NSLocalizedDescriptionKey: "No AI backend configured."])
+        }
 
         await MainActor.run {
             self.segmentsManager.appendDebugMessage("getTransformationPreview: Preview result: '\(result)'")
