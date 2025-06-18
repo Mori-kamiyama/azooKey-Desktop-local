@@ -18,15 +18,7 @@ struct ConfigWindow: View {
     @ConfigState private var debugWindow = Config.DebugWindow()
     @ConfigState private var userDictionary = Config.UserDictionary()
     
-    enum BackendOption: String, CaseIterable, Identifiable {
-        case none = "使わない"
-        case ollama = "Ollama"
-        case gpt = "ChatGPT"
-        
-        var id: Self { self }
-    }
-
-    @State private var selectedBackend: BackendOption = .none
+    @ConfigState private var selectedBackend = Config.AIBackend()
 
     @State private var zenzaiHelpPopover = false
     @State private var zenzaiProfileHelpPopover = false
@@ -120,12 +112,12 @@ struct ConfigWindow: View {
                     Divider()
                     Section(header: Text("生成モデル")) {
                         Picker("使用するバックエンド", selection: $selectedBackend) {
-                            ForEach(BackendOption.allCases) { option in
-                                Text(option.rawValue).tag(option)
+                            ForEach(Config.AIBackend.Value.allCases) { option in
+                                Text(option.displayName).tag(option)
                             }
                         }
                         .pickerStyle(.segmented)
-                        
+
                         // Ollama
                         if selectedBackend == .ollama {
                             VStack(alignment: .leading) {
@@ -133,9 +125,9 @@ struct ConfigWindow: View {
                                 TextField("Ollamaモデル名", text: $ollamaModelName, prompt: Text("例: llama3.2"))
                             }
                         }
-                        
+
                         // ChatGPT
-                        if selectedBackend == .gpt {
+                        if selectedBackend == .openAI {
                             VStack(alignment: .leading) {
                                 SecureField("OpenAI APIキー", text: $openAiApiKey, prompt: Text("例: sk-xxxxxxxxxxx"))
                                 TextField("OpenAIモデル名", text: $openAiModelName, prompt: Text("例: gpt-4o-mini"))
