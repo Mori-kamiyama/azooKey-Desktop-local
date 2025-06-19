@@ -1,6 +1,13 @@
+//
+//  AIClient.swift
+//  azooKeyMac
+//
+//  Created by 森川結太 on 2025/06/19.
+//
 import Foundation
+import OllamaKit
 
-private struct Prompt {
+public struct Prompt {
     static let dictionary: [String: String] = [
         // 文章補完プロンプト（デフォルト）
         "": """
@@ -182,7 +189,8 @@ private struct Prompt {
 //
 // - methods:
 //    - toJSON(): リクエストをOpenAI APIに適したJSON形式に変換する。
-struct OpenAIRequest {
+//    - toOllamaPrompt(): リクエストをOllamaに適したtringに変換する。
+struct AIRequest {
     let prompt: String
     let target: String
     let modelName: String
@@ -220,6 +228,14 @@ struct OpenAIRequest {
                 ]
             ]
         ]
+    }
+
+    func toOllamaPrompt() -> String {
+        """
+        \(Prompt.getPromptText(for: target))
+
+        `\(prompt)<\(target)>`
+        """
     }
 }
 
@@ -260,7 +276,7 @@ enum OpenAIError: LocalizedError {
 // OpenAI APIクライアント
 enum OpenAIClient {
     // APIリクエストを送信する静的メソッド
-    static func sendRequest(_ request: OpenAIRequest, apiKey: String, logger: ((String) -> Void)? = nil) async throws -> [String] {
+    static func sendRequest(_ request: AIRequest, apiKey: String, logger: ((String) -> Void)? = nil) async throws -> [String] {
         guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
             throw OpenAIError.invalidURL
         }
@@ -434,5 +450,60 @@ private struct ChatFailureResponse: Codable, Error {
     struct ErrorResponse: Codable {
         var message: String
         var type: String
+    }
+}
+
+// Ollamaクライアント
+enum OllamaClient {
+
+    /// テキストを行単位の配列で返す汎用リクエスト
+    static func sendRequest(
+        _ request: AIRequest,
+        baseURL: String,
+        logger: ((String) -> Void)? = nil
+    ) async throws -> [String] {
+
+        let ollama = OllamaKit(baseURL: URL(string: baseURL)!)
+
+        var req = OKGenerateRequestData(
+            model: request.modelName,
+            prompt: request.toOllamaPrompt()
+        )
+        req.options = OKCompletionOptions(
+            temperature: 0.7,
+            numPredict: 100
+        )
+
+        // リクエストを送信
+        for try await response in ollama.generate(data: req) {
+            logger?("OllamaKit raw response: \(response.response)")
+
+            let trimmed = response.response.trimmingCharacters(in: .whitespacesAndNewlines)
+            let lines   = trimmed.split(separator: "\n").map(String.init)
+            return lines.isEmpty ? [trimmed] : lines
+        }
+
+        return []
+    }
+
+    /// 単一テキストをそのまま返すシンプル版
+    static func sendTextTransformRequest(
+        prompt: String,
+        modelName: String,
+        baseURL: String
+    ) async throws -> String {
+
+        let ollama = OllamaKit(baseURL: URL(string: baseURL)!)
+
+        let req = OKGenerateRequestData(
+            model: modelName,
+            prompt: prompt
+        )
+
+        for try await response in ollama.generate(data: req) {
+            return response.response.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        return ""
     }
 }
