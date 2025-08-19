@@ -59,7 +59,7 @@ extension Config {
             }
         }
         static var `default`: Value = .inputAndOutput
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.learning"
+        static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.learning"
     }
 }
 
@@ -101,7 +101,7 @@ extension Config {
         static let `default`: Value = .init(items: [
             .init(word: "azooKey", reading: "あずーきー", hint: "アプリ")
         ])
-        static let key: String = "dev.ensan.inputmethod.azooKeyMac.preference.user_dictionary_temporal2"
+        static let key: String = "dev.yuta.inputmethod.azooKeyMac.preference.user_dictionary_temporal2"
     }
 
     struct SystemUserDictionary: CustomCodableConfigItem {
@@ -113,7 +113,7 @@ extension Config {
         }
 
         static let `default`: Value = .init(items: [])
-        static let key: String = "dev.ensan.inputmethod.azooKeyMac.preference.system_user_dictionary"
+        static let key: String = "dev.yuta.inputmethod.azooKeyMac.preference.system_user_dictionary"
     }
 }
 
@@ -140,7 +140,7 @@ extension Config {
             }
         }
         static var `default`: Value = .normal
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.zenzai.personalization_level"
+        static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.zenzai.personalization_level"
     }
 }
 
@@ -151,6 +151,27 @@ extension Config {
             case defaultAZIK
         }
         static var `default`: Value = .default
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.input_style"
+        static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.input_style"
+    }
+}
+
+extension Config {
+    struct ConversionMode: CustomCodableConfigItem {
+        enum Value: String, Codable, CaseIterable {
+            case none = "なし"
+            case openai = "OpenAI APIキーの利用"
+            case ollama = "Ollamaの使用"
+        }
+        static var `default`: Value = .none
+        static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.conversionMode"
+        
+        // 既存コードとの互換性のための計算プロパティ
+        var enableOpenAiApiKey: Bool {
+            value == .openai
+        }
+        
+        var enableOllama: Bool {
+            value == .ollama
+        }
     }
 }

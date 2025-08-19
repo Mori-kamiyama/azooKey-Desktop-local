@@ -22,7 +22,7 @@ extension StringConfigItem {
 
 extension Config {
     struct OpenAiApiKey: StringConfigItem {
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.OpenAiApiKey"
+        static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.OpenAiApiKey"
 
         private static var cachedValue: String = ""
         private static var isLoaded: Bool = false
@@ -56,7 +56,7 @@ extension Config {
 
 extension Config {
     struct ZenzaiProfile: StringConfigItem {
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.ZenzaiProfile"
+        static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.ZenzaiProfile"
     }
 }
 
@@ -64,13 +64,13 @@ extension Config {
     /// OpenAIモデル名
     struct OpenAiModelName: StringConfigItem {
         static var `default`: String = "gpt-4o-mini"
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.OpenAiModelName"
+        static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.OpenAiModelName"
     }
 
     /// OpenAI API エンドポイント
     struct OpenAiApiEndpoint: StringConfigItem {
         static let `default` = "https://api.openai.com/v1/chat/completions"
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.OpenAiApiEndpoint"
+        static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.OpenAiApiEndpoint"
 
         var value: String {
             get {
@@ -84,6 +84,20 @@ extension Config {
 
     /// プロンプト履歴（JSON形式で保存）
     struct PromptHistory: StringConfigItem {
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.PromptHistory"
+        static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.PromptHistory"
+    }
+}
+
+extension Config {
+    struct OllamaURL: CustomCodableConfigItem {
+        typealias Value = String
+        static var `default`: Value = "http://localhost:11434"
+        static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.OllamaURL"
+    }
+
+    struct OllamaModelName: CustomCodableConfigItem {
+        typealias Value = String
+        static var `default`: Value = "qwen3:4b"
+        static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.OllamaModelName"
     }
 }

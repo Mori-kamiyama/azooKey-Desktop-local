@@ -193,7 +193,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             inputLanguage: self.inputLanguage,
             liveConversionEnabled: Config.LiveConversion().value,
             enableDebugWindow: Config.DebugWindow().value,
-            enableSuggestion: Config.EnableOpenAiApiKey().value
+            enableSuggestion: Config.ConversionMode().enableOpenAiApiKey
         )
         return handleClientAction(clientAction, clientActionCallback: clientActionCallback, client: client)
     }
@@ -365,10 +365,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
         switch language {
         case .english:
-            client.selectMode("dev.ensan.inputmethod.azooKeyMac.Roman")
+            client.selectMode("dev.yuta.inputmethod.azooKeyMac.Roman")
             self.segmentsManager.stopJapaneseInput()
         case .japanese:
-            client.selectMode("dev.ensan.inputmethod.azooKeyMac.Japanese")
+            client.selectMode("dev.yuta.inputmethod.azooKeyMac.Japanese")
         }
     }
 

@@ -20,6 +20,7 @@
 		556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52FA2BAAAF7D00EB343F /* en@2x.tiff */; };
 		55A27D022BAAADDB00512DCD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 55A27D002BAAADDB00512DCD /* InfoPlist.strings */; };
 		55A9C54B2BA847A1007F6F02 /* main@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 55A9C54A2BA847A1007F6F02 /* main@2x.tiff */; };
+		D6FB79E12E4E25DB00E8CB89 /* Ollama in Frameworks */ = {isa = PBXBuildFile; productRef = D6FB79E02E4E25DB00E8CB89 /* Ollama */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,6 +76,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6FB79E12E4E25DB00E8CB89 /* Ollama in Frameworks */,
 				554A26602DB37657003C5CFB /* Core in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -103,6 +105,7 @@
 				1A41E61626E745D9009B65D7 /* azooKeyMac */,
 				55CE06ED2CB01F160002DAF1 /* azooKeyMacTests */,
 				55CE06F12CB01F160002DAF1 /* azooKeyMacUITests */,
+				D6FB79DC2E4E210700E8CB89 /* Frameworks */,
 				1A41E61526E745D9009B65D7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -151,6 +154,13 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		D6FB79DC2E4E210700E8CB89 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -177,6 +187,7 @@
 			name = azooKeyMac;
 			packageProductDependencies = (
 				554A265F2DB37657003C5CFB /* Core */,
+				D6FB79E02E4E25DB00E8CB89 /* Ollama */,
 			);
 			productName = azooKeyMac;
 			productReference = 1A41E61426E745D9009B65D7 /* azooKeyMac.app */;
@@ -258,6 +269,7 @@
 			mainGroup = 1A41E60B26E745D9009B65D7;
 			packageReferences = (
 				554A265E2DB37657003C5CFB /* XCLocalSwiftPackageReference "Core" */,
+				D6FB79DF2E4E25CF00E8CB89 /* XCRemoteSwiftPackageReference "ollama-swift" */,
 			);
 			productRefGroup = 1A41E61526E745D9009B65D7 /* Products */;
 			projectDirPath = "";
@@ -486,19 +498,23 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = azooKeyMac/azooKeyMac.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"azooKeyMac/Preview Content\"";
-				DEVELOPMENT_TEAM = 9S3UXHYP65;
+				DEVELOPMENT_TEAM = K53Z6M224T;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = azooKeyMac/Info.plist;
+				INFOPLIST_KEY_LSBackgroundOnly = YES;
+				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = azooKeyMac.NSManualApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -506,8 +522,9 @@
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ensan.inputmethod.azooKeyMac;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.yuta.inputmethod.azooKeyMac-local";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				SWIFT_VERSION = 5.0;
@@ -520,12 +537,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = azooKeyMac/azooKeyMac.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"azooKeyMac/Preview Content\"";
-				DEVELOPMENT_TEAM = 9S3UXHYP65;
+				DEVELOPMENT_TEAM = K53Z6M224T;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -533,7 +551,10 @@
 				GCC_OPTIMIZATION_LEVEL = fast;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = azooKeyMac/Info.plist;
+				INFOPLIST_KEY_LSBackgroundOnly = YES;
+				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = azooKeyMac.NSManualApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -541,8 +562,9 @@
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ensan.inputmethod.azooKeyMac;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.yuta.inputmethod.azooKeyMac-local";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				SWIFT_VERSION = 5.0;
@@ -689,6 +711,17 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		D6FB79DF2E4E25CF00E8CB89 /* XCRemoteSwiftPackageReference "ollama-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mattt/ollama-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		554A265F2DB37657003C5CFB /* Core */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -698,6 +731,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 554A265E2DB37657003C5CFB /* XCLocalSwiftPackageReference "Core" */;
 			productName = Core;
+		};
+		D6FB79E02E4E25DB00E8CB89 /* Ollama */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D6FB79DF2E4E25CF00E8CB89 /* XCRemoteSwiftPackageReference "ollama-swift" */;
+			productName = Ollama;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

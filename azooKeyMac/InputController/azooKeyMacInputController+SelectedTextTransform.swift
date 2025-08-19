@@ -161,7 +161,7 @@ extension azooKeyMacInputController {
     func transformSelectedText(selectedText: String, prompt: String, beforeContext: String = "", afterContext: String = "") {
         self.segmentsManager.appendDebugMessage("transformSelectedText: Starting with text '\(selectedText)' and prompt '\(prompt)'")
 
-        guard Config.EnableOpenAiApiKey().value else {
+        guard Config.ConversionMode().enableOpenAiApiKey else {
             self.segmentsManager.appendDebugMessage("transformSelectedText: OpenAI API is not enabled")
             return
         }
@@ -335,7 +335,7 @@ extension azooKeyMacInputController {
             self.segmentsManager.appendDebugMessage("getTransformationPreview: Starting preview request")
         }
 
-        guard Config.EnableOpenAiApiKey().value else {
+        guard Config.ConversionMode().enableOpenAiApiKey else {
             await MainActor.run {
                 self.segmentsManager.appendDebugMessage("getTransformationPreview: OpenAI API is not enabled")
             }

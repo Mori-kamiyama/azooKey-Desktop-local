@@ -22,6 +22,6 @@ extension IntConfigItem {
 extension Config {
     struct ZenzaiInferenceLimit: IntConfigItem {
         static let `default` = 1
-        static let key = "dev.ensan.inputmethod.azooKeyMac.preference.zenzaiInferenceLimit"
+        static let key = "dev.yuta.inputmethod.azooKeyMac.preference.zenzaiInferenceLimit"
     }
 }

@@ -46,7 +46,7 @@ final class SegmentsManager {
         if alpha == 0 {
             return nil
         }
-        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.dev.ensan.inputmethod.azooKeyMac") else {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.dev.yuta.inputmethod.azooKeyMac") else {
             self.appendDebugMessage("❌ Failed to get container URL.")
             return nil
         }
