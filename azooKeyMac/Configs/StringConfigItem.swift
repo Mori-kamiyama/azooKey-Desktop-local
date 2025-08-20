@@ -97,7 +97,8 @@ extension Config {
 
     struct OllamaModelName: CustomCodableConfigItem {
         typealias Value = String
-        static var `default`: Value = "qwen3:4b"
+        static var `default`: Value = "llama3.2:3b"
         static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.OllamaModelName"
     }
 }
+
