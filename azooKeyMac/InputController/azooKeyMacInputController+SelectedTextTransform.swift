@@ -209,13 +209,26 @@ extension azooKeyMacInputController {
                     self.segmentsManager.appendDebugMessage("transformSelectedText: API key found, making request")
                 }
 
-                let modelName = Config.OpenAiModelName().value
-                let result = try await OpenAIClient.sendTextTransformRequest(
-                    prompt: systemPrompt,
-                    modelName: modelName,
-                    apiKey: apiKey,
-                    apiEndpoint: Config.OpenAiApiEndpoint().value
-                )
+                let result: String
+                if Config.ConversionMode().enableOpenAiApiKey {
+                    let modelName = Config.OpenAiModelName().value
+
+                    result = try await OpenAIClient.sendTextTransformRequest(
+                         prompt: systemPrompt,
+                         modelName: modelName,
+                         apiKey: apiKey,
+                         apiEndpoint: Config.OpenAiApiEndpoint().value
+                    )
+                } else if Config.ConversionMode().enableOllama {
+                    let modelName = Config.OllamaModelName().value
+
+                    result = try await OllamaClient.sendTextTransformRequest(
+                        prompt: systemPrompt,
+                        modelName: modelName
+                    )
+                } else {
+                    result = "Preview not supported in current configuration"
+                }
 
                 await MainActor.run {
                     self.segmentsManager.appendDebugMessage("transformSelectedText: API request completed, result: \(result)")
@@ -335,7 +348,7 @@ extension azooKeyMacInputController {
             self.segmentsManager.appendDebugMessage("getTransformationPreview: Starting preview request")
         }
 
-        guard Config.ConversionMode().enableOpenAiApiKey else {
+        guard Config.ConversionMode().enableOpenAiApiKey || Config.ConversionMode().enableOllama else {
             await MainActor.run {
                 self.segmentsManager.appendDebugMessage("getTransformationPreview: OpenAI API is not enabled")
             }
@@ -368,22 +381,38 @@ extension azooKeyMacInputController {
         let apiKey = Config.OpenAiApiKey().value
         guard !apiKey.isEmpty else {
             await MainActor.run {
-                self.segmentsManager.appendDebugMessage("getTransformationPreview: No OpenAI API key configured")
-            }
-            throw NSError(domain: "TransformationError", code: -2, userInfo: [NSLocalizedDescriptionKey: "OpenAI API key is missing. Please configure your API key in preferences."])
+            self.segmentsManager.appendDebugMessage("getTransformationPreview: No OpenAI API key configured")
+        }
+        throw NSError(domain: "TransformationError", code: -2, userInfo: [NSLocalizedDescriptionKey: "OpenAI API key is missing. Please configure yourAPI key in preferences."])
         }
 
         await MainActor.run {
             self.segmentsManager.appendDebugMessage("getTransformationPreview: Sending preview request to API")
         }
 
-        let modelName = Config.OpenAiModelName().value
-        let result = try await OpenAIClient.sendTextTransformRequest(
-            prompt: systemPrompt,
-            modelName: modelName,
-            apiKey: apiKey,
-            apiEndpoint: Config.OpenAiApiEndpoint().value
-        )
+
+        let result: String
+        if Config.ConversionMode().enableOpenAiApiKey {
+            let modelName = Config.OpenAiModelName().value
+
+            result = try await OpenAIClient.sendTextTransformRequest(
+                 prompt: systemPrompt,
+                 modelName: modelName,
+                 apiKey: apiKey,
+                 apiEndpoint: Config.OpenAiApiEndpoint().value
+            )
+        } else if Config.ConversionMode().enableOllama {
+            let modelName = Config.OllamaModelName().value
+
+            result = try await OllamaClient.sendTextTransformRequest(
+                prompt: systemPrompt,
+                modelName: modelName
+            )
+        } else {
+            result = "Preview not supported in current configuration"
+        }
+        
+        
 
         await MainActor.run {
             self.segmentsManager.appendDebugMessage("getTransformationPreview: Preview result: '\(result)'")

@@ -554,9 +554,23 @@ extension azooKeyMacInputController {
         Task {
             do {
                 self.segmentsManager.appendDebugMessage("APIリクエスト送信中...")
-                let predictions = try await OpenAIClient.sendRequest(request, apiKey: apiKey, apiEndpoint: Config.OpenAiApiEndpoint().value, logger: { [weak self] message in
-                    self?.segmentsManager.appendDebugMessage(message)
-                })
+
+                let predictions: [String]
+                if Config.ConversionMode().enableOpenAiApiKey {
+                    predictions = try await OpenAIClient.sendRequest(
+                        request,
+                        apiKey: apiKey,
+                        apiEndpoint: Config.OpenAiApiEndpoint().value,
+                        logger: { [weak self] message in
+                            self?.segmentsManager.appendDebugMessage(message)
+                    })
+                } else{
+                    predictions = try await OllamaClient.sendRequest(
+                        request,
+                        inputUrl: Config.OllamaURL().value
+                    )
+                }
+
                 self.segmentsManager.appendDebugMessage("APIレスポンス受信成功: \(predictions)")
 
                 // String配列からCandidate配列に変換

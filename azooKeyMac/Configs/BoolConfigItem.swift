@@ -55,13 +55,13 @@ extension Config {
         static let `default` = false
         static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.enableOpenAiApiKey"
     }
-    
+
     /// Ollama
     struct EnableOllama: BoolConfigItem {
         static let `default` = false
         static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.enableOllama"
     }
-    
+
     /// AI変換時にコンテキストを含めるかどうか
     struct IncludeContextInAITransform: BoolConfigItem {
         static let `default` = true

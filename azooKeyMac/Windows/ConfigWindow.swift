@@ -10,17 +10,15 @@ struct ConfigWindow: View {
     @ConfigState private var zenzai = Config.ZenzaiIntegration()
     @ConfigState private var zenzaiProfile = Config.ZenzaiProfile()
     @ConfigState private var zenzaiPersonalizationLevel = Config.ZenzaiPersonalizationLevel()
-    
+
     /// 生成AI系設定
-    //@ConfigState private var enableOpenAiApiKey = Config.EnableOpenAiApiKey()
     @ConfigState private var openAiApiKey = Config.OpenAiApiKey()
     @ConfigState private var openAiModelName = Config.OpenAiModelName()
     @ConfigState private var openAiApiEndpoint = Config.OpenAiApiEndpoint()
-    //@ConfigState private var enableOllama = Config.EnableOllama()
     @ConfigState private var enableAI = Config.ConversionMode()
     @ConfigState private var ollamaUrl = Config.OllamaURL()
     @ConfigState private var ollamaModelName = Config.OllamaModelName()
-    
+
     @ConfigState private var learning = Config.Learning()
     @ConfigState private var inferenceLimit = Config.ZenzaiInferenceLimit()
     @ConfigState private var debugWindow = Config.DebugWindow()
@@ -98,40 +96,24 @@ struct ConfigWindow: View {
 
         } else if enableAI.value == .ollama {
             do {
-                guard let url = URL(string: "\(ollamaUrl.value)/api/generate") else {
-                    connectionTestResult = "エラー: 無効なURL形式です"
-                    connectionTestInProgress = false
-                    return
-                }
-                
-                var request = URLRequest(url: url)
-                request.httpMethod = "POST"
-                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                
-                let requestBody = [
-                    "model": ollamaModelName.value.isEmpty ? "llama2" : ollamaModelName.value,
-                    "prompt": "テスト",
-                    "stream": false
-                ] as [String : Any]
-                
-                request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
-                
-                let (_, response) = try await URLSession.shared.data(for: request)
-                
-                if let httpResponse = response as? HTTPURLResponse {
-                    if httpResponse.statusCode == 200 {
-                        connectionTestResult = "接続成功"
-                    } else {
-                        connectionTestResult = "エラー: HTTPステータス \(httpResponse.statusCode)"
-                    }
-                } else {
-                    connectionTestResult = "エラー: サーバーから応答がありません"
-                }
-                
+
+                let testRequest = OpenAIRequest(
+                    prompt: "テスト",
+                    target: "",
+                    modelName: ollamaModelName.value.isEmpty ? Config.OllamaModelName.default : ollamaModelName.value
+                )
+
+                _ = try await OllamaClient.sendRequest(
+                    testRequest,
+                    inputUrl: ollamaUrl.value.isEmpty ? Config.OllamaURL.default : ollamaUrl.value
+                )
+
+                connectionTestResult = "接続成功"
+
             } catch {
                 connectionTestResult = "エラー: \(error.localizedDescription)"
             }
-            
+
         }
         connectionTestInProgress = false
     }
@@ -267,73 +249,73 @@ struct ConfigWindow: View {
                         Text("システムのユーザ辞書")
                     }
                     Divider()
-                    
-                    
+
                     Picker("いい感じ変換の使用", selection: $enableAI) {
                         ForEach(Config.ConversionMode.Value.allCases, id: \.self) { mode in
                             Text(mode.rawValue).tag(mode)
                         }
                     }
                     .pickerStyle(.segmented)
-                    
-                    
-                    HStack {
-                        SecureField("OpenAI API", text: $openAiApiKey, prompt: Text("例:sk-xxxxxxxxxxx"))
-                        helpButton(
-                            helpContent: "OpenAI APIキーはローカルのみで管理され、外部に公開されることはありません。生成の際にAPIを利用するため、課金が発生します。",
-                            isPresented: $openAiApiKeyPopover
-                        )
-                    }.disabled(enableAI.value != .openai)
-                    TextField("OpenAI Model Name", text: $openAiModelName, prompt: Text("例: gpt-4o-mini"))
-                        .disabled(enableAI.value != .openai)
-                    TextField("API Endpoint", text: $openAiApiEndpoint, prompt: Text("例: https://api.openai.com/v1/chat/completions"))
-                        .disabled(enableAI.value != .openai)
-                        .help("例: https://api.openai.com/v1/chat/completions\nGemini: https://generativelanguage.googleapis.com/v1beta/openai/chat/completions")
 
-                    HStack {
-                        Button("接続テスト") {
-                            Task {
-                                await testConnection()
+                    if enableAI.value == .openai {
+                        Group {
+                            HStack {
+                                SecureField("OpenAI API", text: $openAiApiKey, prompt: Text("例:sk-xxxxxxxxxxx"))
+                                helpButton(
+                                    helpContent: "OpenAI APIキーはローカルのみで管理され、外部に公開されることはありません。生成の際にAPIを利用するため、課金が発生します。",
+                                    isPresented: $openAiApiKeyPopover
+                                )
+                            }
+                            TextField("OpenAI Model Name", text: $openAiModelName, prompt: Text("例: gpt-4o-mini"))
+                            TextField("API Endpoint", text: $openAiApiEndpoint, prompt: Text("例: https://api.openai.com/v1/chat/completions"))
+                                .help("例: https://api.openai.com/v1/chat/completions\nGemini: https://generativelanguage.googleapis.com/v1beta/openai/chat/completions")
+
+                            HStack {
+                                Button("接続テスト") {
+                                    Task {
+                                        await testConnection()
+                                    }
+                                }
+                                .disabled(connectionTestInProgress || openAiApiKey.value.isEmpty)
+
+                                if connectionTestInProgress {
+                                    ProgressView()
+                                        .scaleEffect(0.8)
+                                }
                             }
                         }
-                        .disabled(enableAI.value != .openai || connectionTestInProgress || openAiApiKey.value.isEmpty)
+                    } else if enableAI.value == .ollama {
+                        Group {
+                            TextField("Ollama URL", text: $ollamaUrl, prompt: Text("例: http://localhost:11434"))
+                            TextField("Ollama Model Name", text: $ollamaModelName, prompt: Text("例: qwen3:4b"))
 
-                        if connectionTestInProgress {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                        }
-                    }
-                    
-                    TextField("Ollama URL", text: $ollamaUrl, prompt: Text("例: http://localhost:11434"))
-                        .disabled(enableAI.value != .ollama)
-                    TextField("Ollama Model Name", text: $ollamaModelName, prompt: Text("例: qwen3:4b"))
-                        .disabled(enableAI.value != .ollama)
-                    
-                    HStack {
-                        Button("接続テスト") {
-                            Task {
-                                await testConnection()
+                            HStack {
+                                Button("接続テスト") {
+                                    Task {
+                                        await testConnection()
+                                    }
+                                }
+                                .disabled(connectionTestInProgress || ollamaUrl.value.isEmpty)
+
+                                if connectionTestInProgress {
+                                    ProgressView()
+                                        .scaleEffect(0.8)
+                                }
                             }
-                        }
-                        .disabled(enableAI.value != .ollama || connectionTestInProgress || ollamaUrl.value.isEmpty)
-                        
-                        if connectionTestInProgress {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                        }
-                    }
-                    
 
-                    if let result = connectionTestResult {
-                        Text(result)
-                            .foregroundColor(result.contains("成功") ? .green : .red)
-                            .font(.caption)
-                            .textSelection(.enabled)
-                            .fixedSize(horizontal: false, vertical: true)
+                            if let result = connectionTestResult {
+                                Text(result)
+                                    .foregroundColor(result.contains("成功") ? .green : .red)
+                                    .font(.caption)
+                                    .textSelection(.enabled)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+
+                        }
                     }
-                    
+
                     Divider()
-                    
+
                     Toggle("（開発者用）デバッグウィンドウを有効化", isOn: $debugWindow)
                     LabeledContent("Version") {
                         Text(PackageMetadata.gitTag ?? PackageMetadata.gitCommit ?? "Unknown Version")

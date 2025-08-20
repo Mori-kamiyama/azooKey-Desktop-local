@@ -164,12 +164,12 @@ extension Config {
         }
         static var `default`: Value = .none
         static var key: String = "dev.yuta.inputmethod.azooKeyMac.preference.conversionMode"
-        
+
         // 既存コードとの互換性のための計算プロパティ
         var enableOpenAiApiKey: Bool {
             value == .openai
         }
-        
+
         var enableOllama: Bool {
             value == .ollama
         }
